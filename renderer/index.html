@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' file: data:;">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @font-face {
+    font-family: 'Tech';
+    src: local('Segoe UI'), local('Microsoft YaHei');
+  }
+
+  body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #FAF8F5;
+    color: #1E293B;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ========== Custom Title Bar ========== */
+  .titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: 0 12px;
+    background: #F0EDE8;
+    border-bottom: 1px solid #E2DDD6;
+    -webkit-app-region: drag;
+    flex-shrink: 0;
+  }
+  .titlebar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    -webkit-app-region: drag;
+  }
+  .titlebar-logo {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+  .titlebar-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    letter-spacing: 0.5px;
+  }
+  .titlebar-controls {
+    display: flex;
+    gap: 4px;
+    -webkit-app-region: no-drag;
+  }
+  .titlebar-btn {
+    width: 32px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #64748B;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .titlebar-btn:hover { background: #E2DDD6; color: #1E293B; }
+  .titlebar-btn.btn-close:hover { background: #6366F1; color: #fff; }
+
+  /* ========== Main App ========== */
+  .app {
+    flex: 1;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+  .app::-webkit-scrollbar { width: 4px; }
+  .app::-webkit-scrollbar-thumb { background: #D1CBC3; border-radius: 2px; }
+
+  /* ========== Header / Logo ========== */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #EDE8E2;
+  }
+  .brand-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 2px 10px rgba(99,102,241,0.15);
+    background: #fff;
+  }
+  .brand-text h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1E293B;
+    letter-spacing: -0.3px;
+  }
+  .brand-text span {
+    font-size: 11px;
+    color: #94A3B8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ========== Cards ========== */
+  .card {
+    background: #FFFFFF;
+    border: 1px solid #E8E4DF;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .card-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+
+  /* ========== Input ========== */
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+  .input-row input {
+    flex: 1;
+    background: #F8F6F2;
+    border: 2px solid #E8E4DF;
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: #1E293B;
+    font-size: 26px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Consolas', 'Cascadia Code', monospace;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-row input:focus {
+    border-color: #6366F1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+  .input-row input::placeholder { color: #C4BDB5; font-size: 16px; font-weight: 400; }
+
+  /* ========== Buttons ========== */
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.25);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(99,102,241,0.35);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-danger {
+    background: #EEF2FF; color: #6366F1; border: 1px solid #C7D2FE;
+    width: 100%;
+  }
+  .btn-danger:hover { background: #E0E7FF; }
+  .btn-outline {
+    background: #fff;
+    color: #6366F1;
+    border: 1.5px solid #6366F1;
+    width: 100%;
+  }
+  .btn-outline:hover { background: #EEF2FF; }
+
+  /* ========== Info (pre-calc) ========== */
+  .info-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .info-item {
+    flex: 1;
+    background: #F8F6F2;
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .info-item .val {
+    font-size: 17px;
+    font-weight: 700;
+    color: #6366F1;
+    font-family: 'SF Mono', 'Consolas', monospace;
+  }
+  .info-item .lbl {
+    font-size: 9px;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* ========== Live Dashboard ========== */
+  .dashboard { display: none; }
+  .dashboard.active { display: block; }
+  .live-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .live-card {
+    background: linear-gradient(180deg, #F8F6F2 0%, #F5F2ED 100%);
+    border: 1px solid #E8E4DF;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .live-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6366F1, #0EA5E9);
+    opacity: 0.6;
+  }
+  .live-card .big {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1E293B;
+    font-family: 'SF Mono', 'Consolas', 'Cascadia Code', monospace;
+    letter-spacing: -0.5px;
+  }
+  .live-card .big.accent { color: #6366F1; }
+  .live-card .big.warn { color: #F59E0B; }
+  .live-card .sublabel {
+    font-size: 9px;
+    font-weight: 600;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 4px;
+  }
+
+  /* ========== Progress ========== */
+  .progress-outer {
+    height: 8px;
+    background: #EDE8E2;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-inner {
+    height: 100%;
+    background: linear-gradient(90deg, #6366F1, #0EA5E9);
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #94A3B8;
+    font-weight: 500;
+  }
+
+  /* ========== Results ========== */
+  .result-section { display: none; }
+  .result-section.active { display: block; }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .result-item {
+    background: linear-gradient(180deg, #F0FDF4 0%, #ECFDF5 100%);
+    border: 1px solid #A7F3D0;
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+  }
+  .result-item .big {
+    font-size: 26px;
+    font-weight: 800;
+    color: #059669;
+    font-family: 'SF Mono', 'Consolas', monospace;
+  }
+  .result-item .big.accent { color: #D97706; }
+  .result-item .big.light { color: #6366F1; }
+  .result-item .sublabel {
+    font-size: 9px;
+    font-weight: 600;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 2px;
+  }
+
+  /* ========== Error ========== */
+  .error-box {
+    display: none;
+    background: #FEF3C7; border: 1px solid #FCD34D;
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #DC2626;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .error-box.active { display: block; }
+
+  /* ========== Log ========== */
+  .log-box {
+    background: #F5F2ED;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 10px;
+    color: #94A3B8;
+    max-height: 55px;
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    line-height: 1.5;
+    flex-shrink: 0;
+  }
+
+  /* ========== Misc ========== */
+  .hidden { display: none !important; }
+  .pulse {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Titlebar -->
+<div class="titlebar">
+  <div class="titlebar-left">
+    <img class="titlebar-logo" src="../861d09928adc653af26c70d89df2399b.png" alt="">
+    <span class="titlebar-title">OnlineTypng</span>
+  </div>
+  <div class="titlebar-controls">
+    <button class="titlebar-btn" onclick="window.api.minimizeWindow()" title="Minimize">&#x2014;</button>
+    <button class="titlebar-btn btn-close" onclick="window.api.closeWindow()" title="Close">&#x2715;</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="app" id="app">
+
+  <!-- Brand -->
+  <div class="brand">
+    <img class="brand-logo" src="../861d09928adc653af26c70d89df2399b.png" alt="Logo">
+    <div class="brand-text">
+      <h2>OnlineTypng</h2>
+      <span>10-Key Automation &middot; 5-Minute Test</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Input Card -->
+  <div class="card" id="inputCard">
+    <div class="card-label">Target KPH</div>
+    <div class="input-row">
+      <input type="number" id="kphInput" placeholder="e.g. 13596" min="60" autofocus>
+      <button class="btn btn-primary" id="btnStart" onclick="start()">Start</button>
+    </div>
+    <div class="info-row" id="calcInfo" hidden>
+      <div class="info-item"><div class="val" id="calcKPH">-</div><div class="lbl">Actual KPH</div></div>
+      <div class="info-item"><div class="val" id="calcGroups">-</div><div class="lbl">Groups</div></div>
+      <div class="info-item"><div class="val" id="calcTyped">-</div><div class="lbl">Keystrokes</div></div>
+    </div>
+  </div>
+
+  <!-- Live Dashboard -->
+  <div class="card dashboard" id="liveCard">
+    <div class="card-label">Live Dashboard</div>
+    <div class="live-grid">
+      <div class="live-card">
+        <div class="big accent" id="liveChars">0</div>
+        <div class="sublabel">Chars Typed</div>
+      </div>
+      <div class="live-card">
+        <div class="big" id="liveKPH">0</div>
+        <div class="sublabel">Current KPH</div>
+      </div>
+      <div class="live-card">
+        <div class="big warn" id="liveTime">5:00</div>
+        <div class="sublabel">Remaining</div>
+      </div>
+    </div>
+    <div class="progress-outer">
+      <div class="progress-inner" id="progressBar"></div>
+    </div>
+    <div class="progress-meta">
+      <span id="progressGroups">0 / 0 groups</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn btn-danger" onclick="stop()">Stop</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card result-section" id="resultCard">
+    <div class="card-label">Test Results</div>
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="big accent" id="resKPH">-</div>
+        <div class="sublabel">KPH</div>
+      </div>
+      <div class="result-item">
+        <div class="big" id="resAcc">-</div>
+        <div class="sublabel">Accuracy</div>
+      </div>
+      <div class="result-item">
+        <div class="big light" id="resChars">-</div>
+        <div class="sublabel">Chars Typed</div>
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="reset()">Try Again</button>
+  </div>
+
+  <!-- Log -->
+  <div class="log-box" id="logBox">Ready. Enter target KPH and click Start.</div>
+
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let logs = [];
+
+  function addLog(msg) {
+    logs.push(msg);
+    if (logs.length > 6) logs.shift();
+    logBox.textContent = logs.join(" | ");
+  }
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add("active");
+    setTimeout(() => errorBox.classList.remove("active"), 6000);
+  }
+
+  // Live KPH calculation on input
+  kphInput.addEventListener("input", () => {
+    const kph = parseInt(kphInput.value);
+    if (isNaN(kph) || kph <= 0) { calcInfo.hidden = true; return; }
+    const c = Math.round(kph / 60);
+    calcKPH.textContent = (60 * c).toLocaleString();
+    calcGroups.textContent = Math.round((5 * c) / 6);
+    calcTyped.textContent = (Math.round((5 * c) / 6) * 6).toLocaleString();
+    calcInfo.hidden = false;
+  });
+  kphInput.dispatchEvent(new Event("input"));
+
+  // Handle Enter key to start
+  kphInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") start();
+  });
+
+  async function start() {
+    const kph = parseInt(kphInput.value);
+    if (isNaN(kph) || kph <= 0) return;
+
+    btnStart.disabled = true;
+    btnStart.textContent = "Launching...";
+    addLog("Starting with target KPH=" + kph);
+
+    const result = await window.api.start(kph);
+    if (result && result.error) {
+      showError(result.error);
+      addLog("Error: " + result.error);
+      btnStart.disabled = false;
+      btnStart.textContent = "Start";
+    }
+  }
+
+  async function stop() {
+    addLog("Stopping...");
+    await window.api.stop();
+  }
+
+  function reset() {
+    btnStart.disabled = false;
+    btnStart.textContent = "Start";
+    inputCard.classList.remove("hidden");
+    liveCard.classList.remove("active");
+    resultCard.classList.remove("active");
+    addLog("Reset");
+    window.api.closeBrowser();
+  }
+
+  // IPC listeners
+  window.api.onStatus((data) => {
+    addLog("Running: groups=" + data.groupCount + " | actual KPH=" + data.actualKPH);
+    if (data.phase === "running") {
+      inputCard.classList.add("hidden");
+      liveCard.classList.add("active");
+      resultCard.classList.remove("active");
+    }
+  });
+
+  window.api.onRealtime((data) => {
+    liveChars.textContent = data.charsTyped.toLocaleString();
+    liveKPH.textContent = data.currentKPH.toLocaleString();
+    const min = Math.floor(data.remaining / 60);
+    const sec = data.remaining % 60;
+    liveTime.textContent = min + ":" + String(sec).padStart(2, "0");
+    progressBar.style.width = data.pct + "%";
+    progressPct.textContent = data.pct + "%";
+    progressGroups.textContent = data.completed + " / " + data.groupCount + " groups";
+
+    // Flash remaining time when low
+    if (data.remaining <= 30) {
+      liveTime.classList.add("pulse");
+    } else {
+      liveTime.classList.remove("pulse");
+    }
+  });
+
+  window.api.onProgress((data) => {
+    progressBar.style.width = data.pct + "%";
+    progressPct.textContent = data.pct + "%";
+    const min = Math.floor(data.remaining / 60);
+    const sec = data.remaining % 60;
+    progressGroups.textContent = data.completed + " / " + data.groupCount + " groups";
+  });
+
+  window.api.onDone((data) => {
+    addLog("Done! KPH=" + data.kph + " Acc=" + data.accuracy);
+    liveCard.classList.remove("active");
+    resultCard.classList.add("active");
+    resKPH.textContent = data.kph || "-";
+    resAcc.textContent = data.accuracy || "-";
+    resChars.textContent = data.chars || "-";
+    btnStart.disabled = false;
+    btnStart.textContent = "Start";
+    inputCard.classList.remove("hidden");
+  });
+
+  window.api.onLog?.((msg) => addLog(msg));
+  window.api.onError?.((msg) => showError(msg));
+</script>
+</body>
+</html>

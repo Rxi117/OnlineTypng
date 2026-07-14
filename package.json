@@ -1,0 +1,45 @@
+{
+  "name": "OnlineTypng",
+  "version": "1.0.0",
+  "description": "10-Key Typing Automation Tool",
+  "main": "main.js",
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.7.0",
+      "onFail": "download"
+    }
+  },
+  "dependencies": {
+    "playwright": "^1.61.1"
+  },
+  "devDependencies": {
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.onlinetypng.app",
+    "productName": "OnlineTypng",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "861d09928adc653af26c70d89df2399b.png",
+      "icon.png",
+      "icon.ico"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "icon.png"
+    }
+  }
+}
